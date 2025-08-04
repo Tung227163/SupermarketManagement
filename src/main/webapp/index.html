@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Web Servlet Basic - Ngày 1</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .card h3 {
+            color: #007bff;
+            margin-top: 0;
+            font-size: 1.4em;
+        }
+        
+        .card p {
+            color: #666;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .info-section {
+            background: #e8f4fd;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+        
+        ul {
+            text-align: left;
+            color: #666;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Java Web Servlet Basic</h1>
+        <p class="subtitle">Chương trình học Ngày 1: Tổng quan về Java Web và Servlet cơ bản</p>
+        
+        <div class="info-section">
+            <h3>📚 Nội dung đã học:</h3>
+            <ul>
+                <li>Tổng quan về Java Web, HTTP và mô hình Client-Server</li>
+                <li>Hiểu về Servlet và cách Servlet hoạt động</li>
+                <li>Viết Servlet đầu tiên (HelloServlet)</li>
+                <li>Cách xây dựng và deploy ứng dụng web trên Tomcat</li>
+                <li>Xử lý tham số từ URL trong Servlet</li>
+            </ul>
+        </div>
+        
+        <div class="features">
+            <div class="card">
+                <div class="feature-icon">👋</div>
+                <h3>Hello Servlet</h3>
+                <p>Servlet đầu tiên trả về "Hello World" với thông tin chi tiết về request và servlet lifecycle.</p>
+                <ul>
+                    <li>Hiển thị thông tin servlet</li>
+                    <li>Thông tin request method và URI</li>
+                    <li>Server information</li>
+                </ul>
+                <a href="hello" class="btn">Xem Hello Servlet</a>
+            </div>
+            
+            <div class="card">
+                <div class="feature-icon">📋</div>
+                <h3>Parameter Servlet</h3>
+                <p>Servlet nhận và xử lý tham số từ URL, hiển thị tất cả tham số được truyền vào.</p>
+                <ul>
+                    <li>Nhận tham số từ URL</li>
+                    <li>Hiển thị tất cả parameters</li>
+                    <li>Form test tương tác</li>
+                    <li>Bảo mật XSS</li>
+                </ul>
+                <a href="param" class="btn">Xem Parameter Servlet</a>
+                <a href="param?name=Java&age=25&city=HaNoi" class="btn btn-secondary">Thử với tham số</a>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h3>🛠️ Cách sử dụng:</h3>
+            <p><strong>1. Hello Servlet:</strong> Truy cập <code>/hello</code> để xem servlet cơ bản</p>
+            <p><strong>2. Parameter Servlet:</strong> Truy cập <code>/param</code> hoặc <code>/param?name=TenCuaBan&age=25</code></p>
+            <p><strong>3. Thử nghiệm:</strong> Sử dụng form trong Parameter Servlet để test với các tham số khác nhau</p>
+        </div>
+        
+        <div class="info-section">
+            <h3>📖 Kiến thức đã áp dụng:</h3>
+            <ul>
+                <li><strong>Servlet Lifecycle:</strong> init(), doGet(), doPost(), destroy()</li>
+                <li><strong>HTTP Request/Response:</strong> Xử lý GET và POST requests</li>
+                <li><strong>Parameter Handling:</strong> getParameter(), getParameterNames(), getParameterValues()</li>
+                <li><strong>HTML Generation:</strong> Tạo dynamic HTML response</li>
+                <li><strong>Security:</strong> HTML escaping để tránh XSS</li>
+                <li><strong>Web.xml Configuration:</strong> Servlet mapping và configuration</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h3>🎯 Bài tập đã hoàn thành:</h3>
+            <p>✅ <strong>Bài tập 1:</strong> Viết một Servlet trả về "Hello World"</p>
+            <p>✅ <strong>Bài tập 2:</strong> Viết Servlet nhận tham số từ URL và hiển thị ra trang</p>
+        </div>
+        
+        <div class="footer">
+            <p>🔧 Được xây dựng với Java Servlet API, Maven và Tomcat</p>
+            <p>📚 Dự án học tập Java Web Development - Ngày 1</p>
+        </div>
+    </div>
+</body>
+</html>
