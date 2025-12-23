@@ -129,6 +129,13 @@ Tài khoản mặc định:
 - **Username**: `admin`
 - **Password**: `admin123`
 
+### 4. Demo OOP Concepts (Tùy chọn)
+
+Để xem demo các khái niệm OOP:
+```bash
+python demo.py
+```
+
 ## Sử Dụng
 
 1. **Đăng nhập** với tài khoản admin
