@@ -1,5 +1,5 @@
 # entities/products.py
-from datetime import datetime
+from datetime import datetime, date
 from enum import Enum
 from entities.base import BaseEntity
 
@@ -10,28 +10,31 @@ class Product(BaseEntity):
         self.name = name
         self.price = price
         self.stock_qty = stock_qty
-
+    
     def __str__(self):
-        return f"{self.name} - Qty: {self.stock_qty}"
+        return f"{self.name} (Total: {self.stock_qty})"
+
+class ProductBatch(BaseEntity):
+    """Class quản lý lô hàng"""
+    def __init__(self, id: int, product_id: int, batch_name: str, quantity: int, expiry_date: date):
+        super().__init__(id)
+        self.product_id = product_id
+        self.batch_name = batch_name
+        self.quantity = quantity
+        self.expiry_date = expiry_date
 
 class StockEntryType(Enum):
-    IMPORT = "Import" # Nhập kho
-    EXPORT = "Export" # Xuất kho (hủy, trả hàng NCC)
+    IMPORT = "Import"
+    EXPORT = "Export" # Xuất hủy
+    ADJUST = "Adjust" # Kiểm kê điều chỉnh
 
 class StockEntry(BaseEntity):
     def __init__(self, id: int, entry_code: str, entry_type: StockEntryType, 
-                 quantity: int, product_id: int):
+                 quantity: int, product_id: int, expiry_date: date = None):
         super().__init__(id)
         self.entry_code = entry_code
         self.type = entry_type
         self.quantity = quantity
-        self.product_id = product_id # Foreign Key tới Product
+        self.product_id = product_id
+        self.expiry_date = expiry_date
         self.entry_date = datetime.now()
-
-class InventorySnapshot(BaseEntity):
-    """Lưu trữ trạng thái kho tại một thời điểm (dùng cho báo cáo)"""
-    def __init__(self, id: int, total_products: int, total_stock_value: float):
-        super().__init__(id)
-        self.snapshot_date = datetime.now()
-        self.total_products = total_products
-        self.total_stock_value = total_stock_value

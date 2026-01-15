@@ -3,10 +3,9 @@ import mysql.connector
 from mysql.connector import Error
 
 class DatabaseConfig:
-    """Cấu hình thông số kết nối MySQL"""
     HOST = 'localhost'
-    USER = 'root'          # Thay bằng user MySQL của bạn
-    PASSWORD = 'root'          # Thay bằng password MySQL của bạn
+    USER = 'root'
+    PASSWORD = 'root'  # <--- HÃY KIỂM TRA KỸ MẬT KHẨU TẠI ĐÂY
     DATABASE = 'supermarket_db'
 
 class Database:
@@ -21,24 +20,27 @@ class Database:
             self.connection = mysql.connector.connect(
                 host=DatabaseConfig.HOST,
                 user=DatabaseConfig.USER,
-                password=DatabaseConfig.PASSWORD
+                password=DatabaseConfig.PASSWORD,
+                autocommit=True # Tự động commit để đỡ phải gọi lệnh commit nhiều lần
             )
             
-            # Tạo database nếu chưa tồn tại
             if self.connection.is_connected():
-                cursor = self.connection.cursor()
-                cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DatabaseConfig.DATABASE}")
-                self.connection.database = DatabaseConfig.DATABASE
-                self.cursor = self.connection.cursor(dictionary=True) # dictionary=True để kết quả trả về dạng dict
-                print("Connected to MySQL Database successfully.")
+                # Tạo DB nếu chưa có
+                temp_cursor = self.connection.cursor()
+                temp_cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DatabaseConfig.DATABASE}")
                 
-                # Tự động tạo bảng khi kết nối lần đầu
+                # Kết nối vào DB cụ thể
+                self.connection.database = DatabaseConfig.DATABASE
+                self.cursor = self.connection.cursor(dictionary=True, buffered=True)
+                
+                # Tự động tạo bảng
                 self.create_tables()
+                print("✅ Kết nối MySQL thành công.")
+                
         except Error as e:
-            print(f"Error connecting to MySQL: {e}")
-
-    def get_connection(self):
-        return self.connection
+            print(f"\n❌❌❌ KẾT NỐI DATABASE THẤT BẠI: {e}")
+            print("👉 Gợi ý: Kiểm tra xem XAMPP đã bật MySQL chưa? Mật khẩu trong database.py đúng chưa?\n")
+            self.cursor = None # Đánh dấu là chưa có cursor
 
     def close(self):
         if self.connection and self.connection.is_connected():
@@ -46,13 +48,10 @@ class Database:
             self.connection.close()
             print("MySQL connection closed.")
 
+
     def create_tables(self):
-        """Tạo các bảng dữ liệu khớp với Entity Class"""
-        
-        # 1. Bảng Users (Lưu chung Manager, Cashier, WarehouseKeeper)
-        # Cột 'role' sẽ phân biệt loại user
-        table_users = """
-        CREATE TABLE IF NOT EXISTS users (
+        # 1. Users
+        t_users = """CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
             username VARCHAR(50) UNIQUE NOT NULL,
             password_hash VARCHAR(255) NOT NULL,
@@ -61,92 +60,78 @@ class Database:
             phone VARCHAR(20),
             status VARCHAR(20) DEFAULT 'Active',
             role VARCHAR(20) NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        );
-        """
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );"""
 
-        # 2. Bảng Products
-        table_products = """
-        CREATE TABLE IF NOT EXISTS products (
+        # 2. Products (Vẫn giữ stock_qty để hiển thị tổng tồn kho nhanh)
+        t_products = """CREATE TABLE IF NOT EXISTS products (
             id INT AUTO_INCREMENT PRIMARY KEY,
             product_code VARCHAR(20) UNIQUE NOT NULL,
             name VARCHAR(100) NOT NULL,
             price DECIMAL(10, 2) NOT NULL,
-            stock_qty INT DEFAULT 0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        );
-        """
+            stock_qty INT DEFAULT 0, 
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );"""
 
-        # 3. Bảng Customers
-        table_customers = """
-        CREATE TABLE IF NOT EXISTS customers (
+        # 3. Product Batches (MỚI - Quản lý lô hàng & Hạn sử dụng)
+        t_batches = """CREATE TABLE IF NOT EXISTS product_batches (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            product_id INT NOT NULL,
+            batch_name VARCHAR(50), -- Ví dụ: Lô tháng 10
+            quantity INT DEFAULT 0,
+            expiry_date DATE NOT NULL,
+            received_date DATE DEFAULT (CURRENT_DATE),
+            FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+        );"""
+
+        # 4. Customers
+        t_customers = """CREATE TABLE IF NOT EXISTS customers (
             id INT AUTO_INCREMENT PRIMARY KEY,
             customer_code VARCHAR(20) UNIQUE NOT NULL,
             name VARCHAR(100) NOT NULL,
             phone VARCHAR(20),
             point INT DEFAULT 0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        );
-        """
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );"""
 
-        # 4. Bảng Invoices (Hóa đơn)
-        table_invoices = """
-        CREATE TABLE IF NOT EXISTS invoices (
+        # 5. Invoices
+        t_invoices = """CREATE TABLE IF NOT EXISTS invoices (
             id INT AUTO_INCREMENT PRIMARY KEY,
             invoice_code VARCHAR(20) UNIQUE NOT NULL,
             invoice_date DATETIME DEFAULT CURRENT_TIMESTAMP,
             total_amount DECIMAL(15, 2) DEFAULT 0,
             customer_id INT,
             cashier_id INT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            status VARCHAR(20) DEFAULT 'Paid', -- Paid, Cancelled
             FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
             FOREIGN KEY (cashier_id) REFERENCES users(id) ON DELETE SET NULL
-        );
-        """
+        );"""
 
-        # 5. Bảng InvoiceItems (Chi tiết hóa đơn)
-        table_invoice_items = """
-        CREATE TABLE IF NOT EXISTS invoice_items (
+        # 6. Invoice Items
+        t_inv_items = """CREATE TABLE IF NOT EXISTS invoice_items (
             id INT AUTO_INCREMENT PRIMARY KEY,
             invoice_id INT NOT NULL,
             product_id INT NOT NULL,
             quantity INT NOT NULL,
             price DECIMAL(10, 2) NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
             FOREIGN KEY (product_id) REFERENCES products(id)
-        );
-        """
+        );"""
 
-        # 6. Bảng StockEntries (Nhập/Xuất kho)
-        table_stock_entries = """
-        CREATE TABLE IF NOT EXISTS stock_entries (
+        # 7. Stock Entries (Lịch sử nhập kho)
+        t_stock = """CREATE TABLE IF NOT EXISTS stock_entries (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            entry_code VARCHAR(20) UNIQUE NOT NULL,
+            entry_code VARCHAR(50) UNIQUE NOT NULL,
             entry_type VARCHAR(20) NOT NULL,
             quantity INT NOT NULL,
             product_id INT NOT NULL,
+            expiry_date DATE NULL, -- Lưu lại hạn sử dụng lúc nhập
             entry_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (product_id) REFERENCES products(id)
-        );
-        """
+        );"""
 
-        tables = [table_users, table_products, table_customers, table_invoices, table_invoice_items, table_stock_entries]
-        
-        try:
-            for table_sql in tables:
-                self.cursor.execute(table_sql)
-            self.connection.commit()
-            # print("All tables checked/created successfully.")
-        except Error as e:
-            print(f"Failed to create tables: {e}")
+        for sql in [t_users, t_products, t_batches, t_customers, t_invoices, t_inv_items, t_stock]:
+            self.cursor.execute(sql)
+        self.connection.commit()
 
-# Singleton instance để dùng chung toàn app
 db = Database()

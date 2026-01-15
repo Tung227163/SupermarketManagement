@@ -1,4 +1,3 @@
-# repositories/user_repository.py
 from repositories.base_repository import BaseRepository
 from entities.users import Manager, Cashier, WarehouseKeeper
 from entities.base import UserStatus
@@ -6,24 +5,23 @@ from entities.base import UserStatus
 class UserRepository(BaseRepository):
     
     def _map_row_to_user(self, row):
-        """Hàm phụ trợ: Chuyển đổi dữ liệu từ SQL (dict) sang Object Python"""
-        if not row:
-            return None
+        if not row: return None
         
         role = row['role']
         user_id = row['id']
-        # Tạo object tương ứng với Role
-        if role == 'Manager':
-            user = Manager(user_id, row['username'], row['password_hash'], row['full_name'], row['email'], row['phone'])
-        elif role == 'Cashier':
-            user = Cashier(user_id, row['username'], row['password_hash'], row['full_name'], row['email'], row['phone'])
-        elif role == 'WarehouseKeeper':
-            user = WarehouseKeeper(user_id, row['username'], row['password_hash'], row['full_name'], row['email'], row['phone'])
-        else:
-            return None # Unknown role
+        status = UserStatus(row['status']) # Chuyển string sang Enum
         
-        # Map thêm các trường base
-        user.status = UserStatus(row['status'])
+        # Khởi tạo đúng với __init__ mới (không cần truyền role vào constructor vì class tự định nghĩa)
+        if role == 'Manager':
+            user = Manager(user_id, row['username'], row['password_hash'], row['full_name'], row['email'], row['phone'], status)
+        elif role == 'Cashier':
+            user = Cashier(user_id, row['username'], row['password_hash'], row['full_name'], row['email'], row['phone'], status)
+        elif role == 'WarehouseKeeper':
+            user = WarehouseKeeper(user_id, row['username'], row['password_hash'], row['full_name'], row['email'], row['phone'], status)
+        else:
+            return None 
+        
+        # Role đã được set tự động trong __init__ của từng class
         user.created_at = row['created_at']
         return user
 
@@ -46,11 +44,9 @@ class UserRepository(BaseRepository):
         return self._map_row_to_user(row)
 
     def save(self, user):
-        """Lưu mới hoặc cập nhật User"""
-        role_name = user.__class__.__name__ # Lấy tên class làm role (Manager, Cashier...)
+        role_name = user.role # Lấy từ thuộc tính role của object
         
         if user.id is None:
-            # INSERT
             query = """
                 INSERT INTO users (username, password_hash, full_name, email, phone, status, role)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -58,17 +54,15 @@ class UserRepository(BaseRepository):
             val = (user.username, user.password_hash, user.full_name, user.email, user.phone, user.status.value, role_name)
             self.cursor.execute(query, val)
             self.conn.commit()
-            user.id = self.cursor.lastrowid # Cập nhật ID lại cho object
+            user.id = self.cursor.lastrowid
         else:
-            # UPDATE
             query = """
-                UPDATE users SET full_name=%s, email=%s, phone=%s, status=%s, password_hash=%s
+                UPDATE users SET full_name=%s, email=%s, phone=%s, status=%s, password_hash=%s, role=%s
                 WHERE id=%s
             """
-            val = (user.full_name, user.email, user.phone, user.status.value, user.password_hash, user.id)
+            val = (user.full_name, user.email, user.phone, user.status.value, user.password_hash, role_name, user.id)
             self.cursor.execute(query, val)
             self.conn.commit()
-        
         return user
 
     def delete(self, id):
