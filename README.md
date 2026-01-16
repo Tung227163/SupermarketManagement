@@ -1,175 +1,148 @@
-# Hệ Thống Quản Lý Siêu Thị (Supermarket Management System)
+# 🛒 HỆ THỐNG QUẢN LÝ SIÊU THỊ (SUPERMARKET MANAGEMENT SYSTEM)
 
-## Mô tả
+> **Đồ án cuối kỳ môn Lập trình Hướng đối tượng (OOP)**  
+> **Ngôn ngữ:** Python 3 + MySQL  
+> **Kiến trúc:** Layered Architecture (Entities - Repositories - Services - Controllers)
 
-Dự án quản lý siêu thị được xây dựng bằng Python với các tính năng đầy đủ:
-- Quản lý sản phẩm
-- Quản lý nhân viên
-- Hệ thống báo cáo
-- Xác thực người dùng
-- Lưu trữ dữ liệu với SQLite
+---
 
-## Các Tính Năng Chính
+## 📖 Giới thiệu
+Dự án là một hệ thống backend hoàn chỉnh mô phỏng quy trình vận hành của một siêu thị hiện đại. Hệ thống được thiết kế theo mô hình phân lớp chuẩn công nghiệp, tách biệt rõ ràng giữa dữ liệu, logic nghiệp vụ và giao diện điều khiển.
 
-### 1. Hệ Thống Menu
-- Menu chính với các nhóm chức năng
-- Menu con cho từng nghiệp vụ
-- Điều hướng linh hoạt giữa các menu
+Dự án tập trung giải quyết các bài toán nghiệp vụ phức tạp như:
+*   **Quản lý hạn sử dụng (FEFO):** Hàng hết hạn trước xuất trước.
+*   **Bảo mật phân quyền (RBAC):** Chặt chẽ từ giao diện xuống tận lớp xử lý dữ liệu.
+*   **Quản lý khách hàng:** Tích điểm và đổi điểm thưởng.
 
-### 2. Quản Lý Sản Phẩm
-- ✓ Thêm mới sản phẩm
-- ✓ Duyệt danh sách sản phẩm
-- ✓ Tìm kiếm (theo mã, tên, danh mục)
-- ✓ Cập nhật thông tin sản phẩm
-- ✓ Xóa sản phẩm
-- ✓ Xóa tất cả sản phẩm
-- ✓ Sắp xếp (theo giá, tên)
+Hiện tại, hệ thống sử dụng giao diện dòng lệnh giả lập (CLI/Mock UI) để demo toàn bộ chức năng, sẵn sàng để tích hợp với giao diện đồ họa (PyQt6) trong tương lai.
 
-### 3. Quản Lý Nhân Viên
-- ✓ Thêm mới nhân viên
-- ✓ Duyệt danh sách nhân viên
-- ✓ Tìm kiếm (theo mã, tên, chức vụ)
-- ✓ Cập nhật thông tin nhân viên
-- ✓ Xóa nhân viên
-- ✓ Xóa tất cả nhân viên
-- ✓ Sắp xếp (theo lương)
+---
 
-### 4. Báo Cáo
-- Báo cáo tồn kho
-- Báo cáo hàng sắp hết
-- Báo cáo giá trị tồn kho
-- Báo cáo danh sách nhân viên
-- Báo cáo nhân viên theo chức vụ
-- Báo cáo sản phẩm theo danh mục
+## 🚀 Tính năng nổi bật
 
-### 5. Xác Thực Người Dùng
-- Đăng nhập bắt buộc
-- Quản lý phiên làm việc
-- Đăng xuất
+### 1. Quản lý Bán hàng (Sales) - Dành cho Thu ngân
+- **Xử lý FEFO (First Expired, First Out):** Khi bán hàng, hệ thống tự động trừ kho vào các Lô hàng có hạn sử dụng gần nhất.
+- **Tích điểm & Tiêu điểm:** 
+  - Tự động tích điểm theo giá trị đơn hàng.
+  - Cho phép khách hàng dùng điểm để trừ tiền trực tiếp.
+- **In hóa đơn:** Hiển thị hóa đơn chi tiết ra màn hình sau khi thanh toán.
+- **Tra cứu linh hoạt:** Hỗ trợ tìm sản phẩm bằng Mã vạch (Product Code) thay vì ID nội bộ.
 
-## Các Khái Niệm OOP Được Sử Dụng
+### 2. Quản lý Kho (Inventory) - Dành cho Thủ kho
+- **Quản lý đa Lô hàng (Batch Management):** Một mã sản phẩm có thể có nhiều lô nhập với hạn sử dụng khác nhau.
+- **Nhập kho chi tiết:** Yêu cầu nhập Hạn sử dụng (Expiry Date) cho từng lần nhập.
+- **Tra cứu hạn sử dụng:** Xem chi tiết từng lô hàng của một sản phẩm để biết lô nào sắp hết hạn.
+- **Cảnh báo tồn kho:** Lọc ra các sản phẩm sắp hết hàng.
 
-### 1. Abstract Class (Lớp Trừu Tượng)
-- `BaseEntity`: Lớp cơ sở trừu tượng cho tất cả các entity
-- `GenericDAO`: Interface DAO trừu tượng
+### 3. Bảo mật & Phân quyền (Security) - Dành cho Quản lý
+- **Zero Trust Architecture:** Lớp Service tự kiểm tra quyền của người gọi (User Context). Hacker không thể vượt quyền bằng cách gọi API trực tiếp mà không thông qua giao diện.
+- **3 Vai trò (Roles):**
+  - **Manager:** Quản trị toàn bộ, xem báo cáo, quản lý nhân sự.
+  - **Cashier:** Chỉ được bán hàng.
+  - **WarehouseKeeper:** Chỉ được nhập/xuất kho.
 
-### 2. Inheritance (Kế Thừa)
-- `User`, `Product`, `Employee` kế thừa từ `BaseEntity`
-- `UserDAO`, `ProductDAO`, `EmployeeDAO` kế thừa từ `GenericDAO`
+---
 
-### 3. Polymorphism (Đa Hình)
-- Abstract methods được implement khác nhau ở mỗi lớp con
-- Các phương thức `get_display_info()` và `get_code()` có implementation riêng
+## 🛠 Cài đặt & Hướng dẫn chạy
 
-### 4. Encapsulation (Đóng Gói)
-- Sử dụng properties và private attributes (`_attribute`)
-- Getters và setters cho tất cả các thuộc tính
+### Yêu cầu hệ thống
+- Python 3.8 trở lên.
+- MySQL Server (XAMPP hoặc MySQL Installer).
 
-### 5. Constructor
-- Tất cả các class đều có `__init__()` constructor
-- Constructor với tham số tùy chọn
-
-### 6. Object as Parameter/Return Type
-- Các phương thức DAO nhận và trả về objects
-- Service layer làm việc với objects
-
-## Cấu Trúc Dự Án
-
-```
-df/
-├── main.py                      # Entry point
-├── sql/
-│   └── schema.sql              # Database schema
-├── src/
-│   ├── models/                 # Domain models
-│   │   ├── base_entity.py     # Abstract base class
-│   │   ├── user.py
-│   │   ├── product.py
-│   │   └── employee.py
-│   ├── dao/                    # Data Access Objects
-│   │   ├── generic_dao.py     # Generic DAO interface
-│   │   ├── user_dao.py
-│   │   ├── product_dao.py
-│   │   └── employee_dao.py
-│   ├── services/               # Business logic
-│   │   ├── auth_service.py
-│   │   └── report_service.py
-│   ├── ui/                     # User Interface
-│   │   ├── product_ui.py
-│   │   ├── employee_ui.py
-│   │   └── report_ui.py
-│   └── utils/                  # Utilities
-│       └── database.py
-└── README.md
-```
-
-## Yêu Cầu Hệ Thống
-
-- Python 3.6 trở lên
-- SQLite3 (đi kèm với Python)
-
-## Cài Đặt và Chạy
-
-### 1. Clone repository
-
+### Bước 1: Cài đặt thư viện
+Chạy lệnh sau tại terminal:
 ```bash
-git clone https://github.com/Tung227163/df.git
-cd df
+pip install -r requirements.txt
 ```
 
-### 2. Chạy chương trình
+### Bước 2: Cấu hình Database
+1. Mở file `database.py`.
+2. Tìm class `DatabaseConfig` và cập nhật mật khẩu MySQL của bạn:
+   ```python
+   PASSWORD = 'your_mysql_password' 
+   ```
 
+### Bước 3: Khởi tạo dữ liệu mẫu
+1. Mở phần mềm quản lý MySQL (như MySQL Workbench).
+2. Mở file `seed_data_v2.sql` (nằm trong thư mục gốc).
+3. Chạy toàn bộ script (Execute) để tạo database, bảng và dữ liệu mẫu (Sản phẩm, Khách hàng, Lô hàng...).
+
+### Bước 4: Chạy chương trình
 ```bash
 python main.py
 ```
 
-### 3. Đăng nhập
+---
 
-Tài khoản mặc định:
-- **Username**: `admin`
-- **Password**: `admin123`
+## 🔐 Tài khoản Demo (Có sẵn sau khi chạy Seed Data)
 
-### 4. Demo OOP Concepts (Tùy chọn)
+| Vai trò | Username | Password | Chức năng được phép |
+| :--- | :--- | :--- | :--- |
+| **Quản lý (Admin)** | `admin` | `123456` | Toàn quyền (Báo cáo, Nhân sự, Bán hàng, Kho) |
+| **Thu ngân** | `tn1` | `123456` | Bán hàng, Tích điểm, Tìm khách hàng |
+| **Thủ kho** | `kho1` | `123456` | Nhập kho, Kiểm tra hạn sử dụng, Xem tồn kho |
 
-Để xem demo các khái niệm OOP:
-```bash
-python demo.py
+---
+
+## 📂 Cấu trúc dự án
+
+```text
+supermarket_management/
+│
+├── main.py                   # Entry point (Menu chính & Điều hướng)
+├── database.py               # Cấu hình kết nối MySQL & Tự động tạo bảng
+├── seed_data.sql          # Script SQL tạo dữ liệu mẫu & Stored Procedures
+├── ui_mocks.py               # Giả lập giao diện (Interface chuẩn cho UI thật)
+├── requirements.txt          # Danh sách thư viện
+│
+├── entities/                 # [DATA LAYER] Các class thực thể (OOP)
+│   ├── base.py               # BaseEntity
+│   ├── users.py              # Manager, Cashier, WarehouseKeeper
+│   ├── products.py           # Product, ProductBatch, StockEntry
+│   └── orders.py             # Invoice, InvoiceItem, Customer
+│
+├── repositories/             # [DAO LAYER] Tương tác trực tiếp SQL
+│   ├── base_repository.py    # Abstract Class
+│   ├── user_repository.py
+│   ├── product_repository.py # Xử lý Product & Batch
+│   └── ...
+│
+├── services/                 # [LOGIC LAYER] Xử lý nghiệp vụ phức tạp
+│   ├── sales_service.py      # Logic FEFO, Tích điểm, Hoàn trả
+│   ├── inventory_service.py  # Logic Nhập kho theo Lô
+│   ├── auth_service.py       # Logic Đăng nhập, Hash pass
+│   └── ...
+│
+└── controllers/              # [CONTROL LAYER] Điều phối luồng dữ liệu
+    ├── auth_controller.py
+    ├── sales_controller.py
+    ├── inventory_controller.py
+    └── ...
 ```
 
-## Sử Dụng
+---
 
-1. **Đăng nhập** với tài khoản admin
-2. **Chọn chức năng** từ menu chính:
-   - Quản lý sản phẩm (1)
-   - Quản lý nhân viên (2)
-   - Báo cáo (3)
-3. **Thực hiện các tác vụ** trong menu con
-4. **Đăng xuất** hoặc thoát khi hoàn tất
+## 🧪 Kiểm thử (Testing)
+Dự án đi kèm bộ test tích hợp (Integration Test) để đảm bảo logic chạy đúng.
 
-## Database
+**Cách chạy:**
+```bash
+python test_backend_full.py
+```
 
-Hệ thống sử dụng SQLite để lưu trữ dữ liệu lâu dài:
-- File database: `supermarket.db`
-- Tự động tạo khi chạy lần đầu
-- Dữ liệu mẫu được thêm tự động
+**Kịch bản test tự động bao gồm:**
+1.  **Quản trị:** Tạo nhân viên mới -> Đăng nhập bằng nhân viên đó.
+2.  **Kho vận:** Nhập 2 lô hàng (1 lô cũ, 1 lô mới).
+3.  **Khách hàng:** Tạo khách hàng mới.
+4.  **Bán hàng:** Thực hiện giao dịch mua hàng -> Hệ thống tự động trừ kho vào lô cũ (FEFO) -> Kiểm tra tồn kho sau khi trừ.
+5.  **Báo cáo:** Kiểm tra doanh thu được cập nhật.
 
-## Dữ Liệu Mẫu
+---
 
-### Sản phẩm mẫu
-- Gạo Thơm (P001)
-- Dầu ăn (P002)
-- Sữa tươi (P003)
-- Bánh mì (P004)
-
-### Nhân viên mẫu
-- Nguyễn Văn A - Quản lý (E001)
-- Trần Thị B - Thu ngân (E002)
-- Lê Văn C - Nhân viên kho (E003)
-
-## Tác Giả
-
-Dự án được phát triển cho môn học Lập trình Hướng Đối Tượng
-
-## License
-
-MIT License
+## 📝 Thông tin tác giả
+-   **Nhóm:** 209
+-   **Sinh viên:**
+      -   Phạm Xuân Vỹ - 20237496
+      -   Nguyễn Quang Tùng - 20227163
+-   **Lớp:** 163629
+-   **Môn học:** Lập trình hướng đối tượng - MI4090
