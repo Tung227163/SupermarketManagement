@@ -19,6 +19,13 @@ class SalesService:
         return row # Trả về dict thông tin sản phẩm
 
     def create_invoice(self, cashier, customer_id, cart_items, use_points=False):
+        """
+        :param cashier: Object User đang thực hiện bán hàng
+        """
+        # --- BẢO MẬT: CHỈ THU NGÂN HOẶC QUẢN LÝ MỚI ĐƯỢC BÁN ---
+        if cashier.role not in ['Cashier', 'Manager']:
+            raise PermissionError(f"⛔ BẢO MẬT: User '{cashier.username}' không có quyền bán hàng.")
+        
         """Bán hàng: Trừ kho theo lô (FEFO) + Tích điểm"""
         cust = self.cust_repo.find_by_id(customer_id) if customer_id else None
         

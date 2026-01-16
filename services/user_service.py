@@ -7,7 +7,13 @@ class UserService:
     def __init__(self):
         self.user_repo = UserRepository()
 
-    def create_user(self, username, password, full_name, email, phone, role):
+    # Thêm tham số admin_user vào tất cả các hàm quan trọng
+    def create_user(self, admin_user, username, password, full_name, email, phone, role):
+        
+        # --- BẢO MẬT ---
+        if admin_user.role != 'Manager':
+            raise PermissionError("⛔ BẢO MẬT: Chỉ Manager mới được tạo nhân viên.")
+        
         """Tạo nhân viên mới"""
         # 1. Kiểm tra trùng username
         if self.user_repo.find_by_username(username):
@@ -33,7 +39,10 @@ class UserService:
         print(f"✅ Đã tạo nhân viên: {username} - {role}")
         return saved_user
 
-    def update_user_info(self, user_id, full_name, email, phone):
+    def update_user_info(self, admin_user, user_id, full_name, email, phone):
+        # --- BẢO MẬT ---
+        if admin_user.role != 'Manager':
+            raise PermissionError("⛔ BẢO MẬT: Chỉ Manager mới được cập nhật thông tin nhân viên.")
         """Cập nhật thông tin cơ bản"""
         user = self.user_repo.find_by_id(user_id)
         if user:
@@ -45,7 +54,10 @@ class UserService:
         else:
             print("❌ Không tìm thấy User.")
 
-    def set_user_status(self, user_id, status: UserStatus):
+    def set_user_status(self, admin_user, user_id, status: UserStatus):
+        # --- BẢO MẬT ---
+        if admin_user.role != 'Manager':
+            raise PermissionError("⛔ BẢO MẬT: Chỉ Manager mới được khóa/mở tài khoản.")
         """Khóa hoặc Mở khóa tài khoản"""
         user = self.user_repo.find_by_id(user_id)
         if user:
@@ -55,7 +67,10 @@ class UserService:
         else:
             print("❌ Không tìm thấy User.")
 
-    def reset_password(self, user_id, new_password):
+    def reset_password(self, admin_user, user_id, new_password):
+        # --- BẢO MẬT ---
+        if admin_user.role != 'Manager':
+            raise PermissionError("⛔ BẢO MẬT: Chỉ Manager mới được cấp lại mật khẩu.")
         """Manager cấp lại mật khẩu cho nhân viên"""
         user = self.user_repo.find_by_id(user_id)
         if user:
@@ -65,5 +80,9 @@ class UserService:
         else:
             print("❌ Không tìm thấy User.")
     
-    def get_all_users(self):
-        return self.user_repo.find_all()
+    def get_all_users(self, admin_user):
+            # Kiểm tra quyền
+            if admin_user.role != 'Manager':
+                raise PermissionError("⛔ BẢO MẬT: Bạn không có quyền xem danh sách nhân viên.")
+            
+            return self.user_repo.find_all()

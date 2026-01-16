@@ -5,7 +5,11 @@ class ReportService:
     def __init__(self):
         self.cursor = db.cursor
 
-    def get_daily_revenue(self, date_str=None):
+    def get_daily_revenue(self, user, date_str=None):
+        # --- BẢO MẬT ---
+        if user.role != 'Manager':
+            raise PermissionError("⛔ BẢO MẬT: Chỉ Manager mới được xem báo cáo.")
+
         """Doanh thu trong ngày (Mặc định là hôm nay)"""
         if not date_str:
             date_str = datetime.now().strftime('%Y-%m-%d')
@@ -18,7 +22,10 @@ class ReportService:
         self.cursor.execute(query, (date_str,))
         return self.cursor.fetchone()
 
-    def get_monthly_revenue(self, month, year):
+    def get_monthly_revenue(self, user, month, year):
+        if user.role != 'Manager':
+            raise PermissionError("⛔ BẢO MẬT: Chỉ Manager mới được xem báo cáo.")
+
         query = """
             SELECT DATE(invoice_date) as sale_date, SUM(total_amount) as revenue
             FROM invoices
@@ -29,8 +36,10 @@ class ReportService:
         self.cursor.execute(query, (month, year))
         return self.cursor.fetchall()
 
-    def get_top_selling_products(self, limit=5):
-        """Top sản phẩm bán chạy nhất"""
+    def get_top_selling_products(self, user, limit=5):
+        if user.role != 'Manager':
+            raise PermissionError("⛔ BẢO MẬT: Chỉ Manager mới được xem báo cáo.")
+            
         query = """
             SELECT p.name, SUM(ii.quantity) as total_sold
             FROM invoice_items ii
@@ -42,7 +51,10 @@ class ReportService:
         self.cursor.execute(query, (limit,))
         return self.cursor.fetchall()
 
-    def get_inventory_value(self):
+    def get_inventory_value(self, user):
+        if user.role != 'Manager':
+            raise PermissionError("⛔ BẢO MẬT: Chỉ Manager mới được xem báo cáo.")
+
         """Tổng giá trị hàng tồn kho (Vốn)"""
         query = "SELECT SUM(price * stock_qty) as total_value FROM products"
         self.cursor.execute(query)
