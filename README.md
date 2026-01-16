@@ -7,11 +7,7 @@
 ---
 
 ## 📖 Giới thiệu
-<<<<<<< HEAD
 Dự án là một hệ thống hoàn chỉnh mô phỏng quy trình vận hành của một siêu thị hiện đại. Hệ thống được thiết kế theo mô hình phân lớp chuẩn công nghiệp, tách biệt rõ ràng giữa dữ liệu, logic nghiệp vụ và giao diện điều khiển.
-=======
-Dự án là một hệ thống backend hoàn chỉnh mô phỏng quy trình vận hành của một siêu thị hiện đại. Hệ thống được thiết kế theo mô hình phân lớp chuẩn công nghiệp, tách biệt rõ ràng giữa dữ liệu, logic nghiệp vụ và giao diện điều khiển.
->>>>>>> 52d8cfccbbde2cb9bf3ebe64c05bd4f84e978eaf
 
 Dự án tập trung giải quyết các bài toán nghiệp vụ phức tạp như:
 *   **Quản lý hạn sử dụng (FEFO):** Hàng hết hạn trước xuất trước.
@@ -68,11 +64,7 @@ pip install -r requirements.txt
 
 ### Bước 3: Khởi tạo dữ liệu mẫu
 1. Mở phần mềm quản lý MySQL (như MySQL Workbench).
-<<<<<<< HEAD
 2. Mở file `seed_data.sql` (nằm trong thư mục gốc).
-=======
-2. Mở file `seed_data_v2.sql` (nằm trong thư mục gốc).
->>>>>>> 52d8cfccbbde2cb9bf3ebe64c05bd4f84e978eaf
 3. Chạy toàn bộ script (Execute) để tạo database, bảng và dữ liệu mẫu (Sản phẩm, Khách hàng, Lô hàng...).
 
 ### Bước 4: Chạy chương trình
@@ -89,7 +81,6 @@ python main.py
 | **Quản lý (Admin)** | `admin` | `123456` | Toàn quyền (Báo cáo, Nhân sự, Bán hàng, Kho) |
 | **Thu ngân** | `tn1` | `123456` | Bán hàng, Tích điểm, Tìm khách hàng |
 | **Thủ kho** | `kho1` | `123456` | Nhập kho, Kiểm tra hạn sử dụng, Xem tồn kho |
-<<<<<<< HEAD
 
 ---
 
@@ -139,69 +130,10 @@ supermarket_management/
     ├── sales_controller.py   # Điều khiển giao diện bán hàng (Scan/Thanh toán)
     └── report_controller.py  # Điều khiển giao diện báo cáo
 
-=======
-
----
-
-## 📂 Cấu trúc dự án
-
-```text
-supermarket_management/
-│
-├── main.py                   # Entry point (Menu chính & Điều hướng)
-├── database.py               # Cấu hình kết nối MySQL & Tự động tạo bảng
-├── seed_data.sql          # Script SQL tạo dữ liệu mẫu & Stored Procedures
-├── ui_mocks.py               # Giả lập giao diện (Interface chuẩn cho UI thật)
-├── requirements.txt          # Danh sách thư viện
-│
-├── entities/                 # [DATA LAYER] Các class thực thể (OOP)
-│   ├── base.py               # BaseEntity
-│   ├── users.py              # Manager, Cashier, WarehouseKeeper
-│   ├── products.py           # Product, ProductBatch, StockEntry
-│   └── orders.py             # Invoice, InvoiceItem, Customer
-│
-├── repositories/             # [DAO LAYER] Tương tác trực tiếp SQL
-│   ├── base_repository.py    # Abstract Class
-│   ├── user_repository.py
-│   ├── product_repository.py # Xử lý Product & Batch
-│   └── ...
-│
-├── services/                 # [LOGIC LAYER] Xử lý nghiệp vụ phức tạp
-│   ├── sales_service.py      # Logic FEFO, Tích điểm, Hoàn trả
-│   ├── inventory_service.py  # Logic Nhập kho theo Lô
-│   ├── auth_service.py       # Logic Đăng nhập, Hash pass
-│   └── ...
-│
-└── controllers/              # [CONTROL LAYER] Điều phối luồng dữ liệu
-    ├── auth_controller.py
-    ├── sales_controller.py
-    ├── inventory_controller.py
-    └── ...
->>>>>>> 52d8cfccbbde2cb9bf3ebe64c05bd4f84e978eaf
 ```
 
 ---
 
-<<<<<<< HEAD
-=======
-## 🧪 Kiểm thử (Testing)
-Dự án đi kèm bộ test tích hợp (Integration Test) để đảm bảo logic chạy đúng.
-
-**Cách chạy:**
-```bash
-python test_backend_full.py
-```
-
-**Kịch bản test tự động bao gồm:**
-1.  **Quản trị:** Tạo nhân viên mới -> Đăng nhập bằng nhân viên đó.
-2.  **Kho vận:** Nhập 2 lô hàng (1 lô cũ, 1 lô mới).
-3.  **Khách hàng:** Tạo khách hàng mới.
-4.  **Bán hàng:** Thực hiện giao dịch mua hàng -> Hệ thống tự động trừ kho vào lô cũ (FEFO) -> Kiểm tra tồn kho sau khi trừ.
-5.  **Báo cáo:** Kiểm tra doanh thu được cập nhật.
-
----
-
->>>>>>> 52d8cfccbbde2cb9bf3ebe64c05bd4f84e978eaf
 ## 📝 Thông tin tác giả
 -   **Nhóm:** 209
 -   **Sinh viên:**
